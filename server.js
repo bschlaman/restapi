@@ -9,8 +9,7 @@ const server = http.createServer();
 const port = 5812;
 const name = "BREND-API"
 const logPath = "logs/output.log";
-const movegenPath = "/home/brendan/hax/c_files/chess/move_generator/out";
-// const inputFEN = "r1bqk1nr/pppp1ppp/2n5/b7/3NP3/P1N5/1PP2PPP/R1BQKB1R w KQkq f3 2 15";
+let movegenPath = "";
 
 // helper functions
 var logStream = fs.createWriteStream(__dirname + '/' + logPath, {flags : 'a'});
@@ -71,6 +70,12 @@ server.on('request', async (req, res) => {
 	}
 });
 
+var configInit = () => {
+	config = __dirname + '/config.json';
+	parsed = JSON.parse(fs.readFileSync(config, 'UTF-8'));
+	movegenPath = parsed.movegenPath;
+}
+
 var serverInit = () => {
 	server.listen(port);
 	logfile('Listening on port: ' + port);
@@ -83,6 +88,7 @@ let startTime = new Date().toLocaleString();
 logfile('\n\n   #####   Starting ' + name + ' at ' + startTime + '   #####   \n\n');
 
 (async () => {
+	configInit();
 	serverInit();
 })();
 
