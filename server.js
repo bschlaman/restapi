@@ -1,15 +1,17 @@
 // declaring requirements
 const http = require('http');
+const https = require('https');
 const util = require('util');
 const fs = require('fs');
 const exec = require('child_process').exec;
 const querystring = require('querystring');
 // global constants
-const server = http.createServer();
 const port = 5812;
 const name = "BREND-API"
 const logPath = "logs/output.log";
+let sslserver;
 let movegenPath = "";
+let options;
 
 // helper functions
 var logStream = fs.createWriteStream(__dirname + '/' + logPath, {flags : 'a'});
@@ -27,7 +29,8 @@ var logfile = async function(...d) {
 
 // meat and potatoes
 // same as http.createServer(()=>{});
-server.on('request', async (req, res) => {
+var serverEventInit = () => {
+sslserver.on('request', async (req, res) => {
 	const { method, url } = req;
 	const { headers } = req;
 
@@ -69,19 +72,27 @@ server.on('request', async (req, res) => {
 		res.end();
 	}
 });
+}
 
 var configInit = () => {
 	config = __dirname + '/config.json';
 	parsed = JSON.parse(fs.readFileSync(config, 'UTF-8'));
 	movegenPath = parsed.movegenPath;
+	let keyfile = parsed.key;
+	let certfile = parsed.cert;
+	options = {
+		key: fs.readFileSync(keyfile),
+		cert: fs.readFileSync(certfile)
+	};
 	logfile('Config loaded. Using movegen: ' + movegenPath);
 }
 
 var serverInit = () => {
-	server.listen(port);
+	sslserver.listen(port);
 	logfile('Listening on port: ' + port);
 	logfile(name + ' is ready to accept requests.');
 }
+
 
 // SERVER START
 
@@ -90,6 +101,8 @@ logfile('\n\n   #####   Starting ' + name + ' at ' + startTime + '   #####   \n\
 
 (async () => {
 	configInit();
+	sslserver = https.createServer(options);
+	serverEventInit();
 	serverInit();
 })();
 
