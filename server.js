@@ -74,6 +74,7 @@ var configInit = () => {
 	config = __dirname + '/config.json';
 	parsed = JSON.parse(fs.readFileSync(config, 'UTF-8'));
 	movegenPath = parsed.movegenPath;
+	logfile('Config loaded. Using movegen: ' + movegenPath);
 }
 
 var serverInit = () => {
